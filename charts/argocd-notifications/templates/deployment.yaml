@@ -20,6 +20,9 @@ spec:
       {{- end }}
       labels:
         {{- include "argocd-notifications.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
     {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -31,7 +34,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ include "argocd-notifications.name" . }}-controller
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
@@ -42,6 +45,8 @@ spec:
             {{- if .Values.metrics.enabled }}
             - --metrics-port={{ .Values.metrics.port }}
             {{- end }}
+            - --secret-name={{ include "argocd-notifications.secretName" . }}
+            - --config-map-name={{ include "argocd-notifications.configMapName" . }}
             {{- range .Values.extraArgs }}
             - {{ . | squote }}
             {{- end }}

@@ -1,10 +1,10 @@
 apiVersion: v2
-appVersion: 2.0.5
+appVersion: v2.2.5
 description: A Helm chart for ArgoCD, a declarative, GitOps continuous delivery tool for Kubernetes.
 name: argo-cd
-version: 3.11.4
+version: 3.33.6
 home: https://github.com/argoproj/argo-helm
-icon: https://argoproj.github.io/argo-cd/assets/logo.png
+icon: https://argo-cd.readthedocs.io/en/stable/assets/logo.png
 keywords:
   - argoproj
   - argocd
@@ -21,4 +21,4 @@ dependencies:
     condition: redis-ha.enabled
 annotations:
   artifacthub.io/changes: |
-    - "[Fixed]: Can't login when using configs.secret.argocdServerAdminPassword"
+    - "[Fixed]: Fix typo of policy.csv comment in values"

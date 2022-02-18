@@ -42,10 +42,11 @@ Create dex name and version as used by the chart label.
 Create redis name and version as used by the chart label.
 */}}
 {{- define "argo-cd.redis.fullname" -}}
-{{ $redisHa := (index .Values "redis-ha") }}
+{{- $redisHa := (index .Values "redis-ha") -}}
+{{- $redisHaContext := dict "Chart" (dict "Name" "redis-ha") "Release" .Release "Values" $redisHa -}}
 {{- if $redisHa.enabled -}}
     {{- if $redisHa.haproxy.enabled -}}
-        {{- printf "%s-redis-ha-haproxy" .Release.Name | trunc 63 | trimSuffix "-" -}}
+        {{- printf "%s-haproxy" (include "redis-ha.fullname" $redisHaContext) | trunc 63 | trimSuffix "-" -}}
     {{- end -}}
 {{- else -}}
 {{- printf "%s-%s" (include "argo-cd.fullname" .) .Values.redis.name | trunc 63 | trimSuffix "-" -}}
@@ -136,6 +137,9 @@ helm.sh/chart: {{ include "argo-cd.chart" .context }}
 {{ include "argo-cd.selectorLabels" (dict "context" .context "component" .component "name" .name) }}
 app.kubernetes.io/managed-by: {{ .context.Release.Service }}
 app.kubernetes.io/part-of: argocd
+{{- with .context.Values.global.additionalLabels }}
+{{ toYaml . }}
+{{- end }}
 {{- end }}
 
 {{/*
@@ -189,4 +193,11 @@ Merge Argo Configuration with Preset Configuration
   {{- if .Values.server.configEnabled -}}
 {{- toYaml (mergeOverwrite (default dict (fromYaml (include "argo-cd.config.presets" $))) .Values.server.config) }}
   {{- end -}}
+{{- end -}}
+
+{{/*
+Return the default ArgoCD app version
+*/}}
+{{- define "argo-cd.defaultTag" -}}
+  {{- default .Chart.AppVersion .Values.global.image.tag }}
 {{- end -}}
